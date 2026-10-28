@@ -10,8 +10,7 @@ import {
 } from "../note.ts";
 
 const NOTES_FILE = "notes.sqlite";
-/** Chosen so a second process waits out one write. Not a measured limit. */
-const BUSY_TIMEOUT_MS = 5000;
+const WAIT_ONE_WRITE_MS = 5000;
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS notes (
@@ -37,7 +36,7 @@ export type NoteDb = {
 export function openDb(dataDir: string): NoteDb {
 	mkdirSync(dataDir, { recursive: true });
 	const database = new Database(join(dataDir, NOTES_FILE));
-	database.exec(`PRAGMA busy_timeout = ${BUSY_TIMEOUT_MS}`);
+	database.exec(`PRAGMA busy_timeout = ${WAIT_ONE_WRITE_MS}`);
 	database.exec(SCHEMA);
 	const selectOrdered = database.query<unknown, []>(
 		"SELECT id, title, body, created, updated FROM notes ORDER BY updated DESC, id DESC",

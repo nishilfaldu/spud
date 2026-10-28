@@ -28,7 +28,7 @@ export type OpenNotes = {
 };
 
 const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
-const TIME_LIMIT = 2 ** 48;
+const TIME_PREFIX_LIMIT_MS = 2 ** 48;
 
 const systemClock: Clock = {
 	now(): IsoTime {
@@ -42,7 +42,10 @@ const systemClock: Clock = {
 
 const randomIds: IdSource = {
 	next(now: IsoTime): NoteId {
-		return mintNoteId(now, crypto.getRandomValues(new Uint8Array(10)));
+		return mintTimePrefixedNoteId(
+			now,
+			crypto.getRandomValues(new Uint8Array(10)),
+		);
 	},
 };
 
@@ -182,9 +185,7 @@ function textHas(note: Note, query: string): boolean {
 	);
 }
 
-// 48-bit Unix ms, then 80 bits of entropy, Crockford base32.
-// The time prefix sorts with `id DESC` when `updated` ties.
-function mintNoteId(now: IsoTime, entropy: Uint8Array): NoteId {
+function mintTimePrefixedNoteId(now: IsoTime, entropy: Uint8Array): NoteId {
 	if (entropy.length !== 10) {
 		throw new Error("note id entropy must be 10 bytes");
 	}
@@ -198,7 +199,7 @@ function mintNoteId(now: IsoTime, entropy: Uint8Array): NoteId {
 
 function unixMs(now: IsoTime): number {
 	const ms = Date.parse(now);
-	if (!Number.isInteger(ms) || ms < 0 || ms >= TIME_LIMIT) {
+	if (!Number.isInteger(ms) || ms < 0 || ms >= TIME_PREFIX_LIMIT_MS) {
 		throw new Error("note id time is out of range");
 	}
 	return ms;

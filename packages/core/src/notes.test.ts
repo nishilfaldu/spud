@@ -144,3 +144,39 @@ test("session follows the readme note flow", () => {
 		rmSync(dataDir, { recursive: true, force: true });
 	}
 });
+
+test("a later create mints a greater id", () => {
+	const dataDir = mkdtempSync(join(tmpdir(), "spud-notes-"));
+	const earlier = iso("2026-10-28T20:31:00.000Z");
+	const later = iso("2026-10-28T20:32:00.000Z");
+	const notes = openNotes({ dataDir, clock: clockOf([earlier, later]) });
+	try {
+		const milk = notes.create({ title: title("Milk"), body: "Buy oat milk" });
+		const eggs = notes.create({ title: title("Eggs"), body: "A dozen" });
+		expect(milk.id < eggs.id).toBe(true);
+		expect(notes.list().map((note) => note.id)).toEqual([eggs.id, milk.id]);
+	} finally {
+		notes.close();
+		rmSync(dataDir, { recursive: true, force: true });
+	}
+});
+
+test("notes with the same updated sort by id descending", () => {
+	const dataDir = mkdtempSync(join(tmpdir(), "spud-notes-"));
+	const at = iso("2026-10-28T20:31:00.000Z");
+	const low = noteId("01JB2K3N4P5Q6R7S8T9VWXYZ0A");
+	const high = noteId("01JB2K3N4P5Q6R7S8T9VWXYZ1B");
+	const notes = openNotes({
+		dataDir,
+		clock: clockOf([at, at]),
+		ids: idsOf([low, high]),
+	});
+	try {
+		notes.create({ title: title("Milk"), body: "Buy oat milk" });
+		notes.create({ title: title("Eggs"), body: "A dozen" });
+		expect(notes.list().map((note) => note.id)).toEqual([high, low]);
+	} finally {
+		notes.close();
+		rmSync(dataDir, { recursive: true, force: true });
+	}
+});
