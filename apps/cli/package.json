@@ -1,0 +1,13 @@
+{
+	"name": "@spud/cli",
+	"private": true,
+	"type": "module",
+	"version": "0.0.0",
+	"bin": {
+		"spud": "./src/main.ts"
+	},
+	"exports": {},
+	"dependencies": {
+		"@spud/core": "workspace:*"
+	}
+}

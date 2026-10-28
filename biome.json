@@ -1,0 +1,59 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
+	"files": {
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/.git",
+			"!**/.cursor",
+			"!README.md"
+		]
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"paths": {
+							"bun:sqlite": "sqlite belongs in packages/core/src/internal"
+						},
+						"patterns": [
+							{
+								"group": ["**/packages/*/src/**", "**/apps/*/src/**"],
+								"message": "Import workspace packages by name, not by relative path into src"
+							}
+						]
+					}
+				}
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true
+	},
+	"overrides": [
+		{
+			"includes": ["packages/core/src/internal/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["**/packages/*/src/**", "**/apps/*/src/**"],
+										"message": "Import workspace packages by name, not by relative path into src"
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	]
+}
